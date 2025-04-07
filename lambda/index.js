@@ -5,8 +5,10 @@ const bedrockAgent = new AWS.BedrockAgent();
 exports.handler = async (event) => {
     console.log('Event:', JSON.stringify(event));
 
+    // use the AWS_REGION from Lambda's runtime env instead of a custom env var
+    const region = process.env.AWS_REGION;
+
     try {
-        
         // check if this is a request to list KBs
         if (event.path === '/api/knowledge-bases' && event.httpMethod === 'GET') {
             return await listKnowledgeBases();
@@ -28,7 +30,7 @@ exports.handler = async (event) => {
                 };
             }
 
-            const response = await queryChatWithRetrievalResponse(message, knowledgeBaseId);
+            const response = await queryChatWithRetrievalResponse(message, knowledgeBaseId, region);
 
             return {
                 statusCode: 200,
@@ -104,44 +106,30 @@ async function listKnowledgeBases() {
     }
 }
 
-// query the knowledgebase and get a response
-async function queryChatWithRetrievalResponse(message, knowledgebaseId) {
-    //customise model id as needed
-    const modelId = 'anthropic.claude-3-5-haiku-20241022-v1:0'
-
-    const payload = {
-        input: {
-            text: message
-        },
-        retrieveConfig: {
-            knowledgeBaseConfigurations: [
-                {
-                    knowledgebaseId,
-                    modelArn: `arn:aws:bedrock:${process.env.AWS_REGION}:model/${modelId}`
-                }
-            ]
-        }
-    };
-
+// Query the Knowledge Base and get a response
+async function queryChatWithRetrievalResponse(message, knowledgeBaseId, region) {
+    // You can customize the model ID as needed
+    const modelId = 'anthropic.claude-3-sonnet-20240229-v1:0';
+    
     try {
-        const response = await bedrockAgent.retrieveAndGenerate({
-            input: {
-                text: message
-            },
-            retrieveAndGenerateConfiguration: {
-                type: 'KNOWLEDGE_BASE',
-                knowledgeBaseConfiguration: {
-                    knowledgebaseId,
-                    modelArn: `arn:aws:bedrock:${process.env.AWS_REGION}:model/${modelId}`
-                }
-            }
-        }).promise();
-
-        // extract the response text from the result
-        const generatedResponse = respoinse.output.text;
-        return generatedResponse;
+      const response = await bedrockAgent.retrieveAndGenerate({
+        input: {
+          text: message
+        },
+        retrieveAndGenerateConfiguration: {
+          type: 'KNOWLEDGE_BASE',
+          knowledgeBaseConfiguration: {
+            knowledgeBaseId,
+            modelArn: `arn:aws:bedrock:${region}:model/${modelId}`
+          }
+        }
+      }).promise();
+      
+      // Extract the response text from the result
+      const generatedResponse = response.output.text;
+      return generatedResponse;
     } catch (error) {
-        console.error('Error quering bedrock with retrieval: ', error);
-        throw error;
+      console.error('Error querying Bedrock with retrieval:', error);
+      throw error;
     }
-}
+  }
