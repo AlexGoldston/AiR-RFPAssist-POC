@@ -1,5 +1,5 @@
 #!/bin/bash
-# deploy.sh - deploy the app by making executable with `chmod +x deploy.sh` then in bash ./deploy.sh
+# deploy.sh - Script to deploy the Bedrock KB Chat app
 
 set -e
 
@@ -47,9 +47,7 @@ echo "Deploying with CloudFormation..."
 aws cloudformation deploy \
   --template-file packaged-template.yaml \
   --stack-name $STACK_NAME \
-  --parameter-overrides \
-    GitHubRepo=$GITHUB_REPO \
-    GitHubToken=$GITHUB_TOKEN \
+  --parameter-overrides GitHubRepo=$GITHUB_REPO GitHubToken=$GITHUB_TOKEN \
   --capabilities CAPABILITY_IAM
 
 # Get outputs
