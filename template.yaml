@@ -55,9 +55,7 @@ Resources:
       Runtime: nodejs18.x
       Timeout: 30
       MemorySize: 256
-      Environment:
-        Variables:
-          AWS_REGION: !Ref AWS::Region
+      # No environment variables - Lambda already provides AWS_REGION
       Code:
         ZipFile: |
           // This is a placeholder. The actual code will be deployed from your repository
