@@ -38,6 +38,13 @@ check_stack() {
 # Get inputs if not provided
 if [ -z "$GITHUB_REPO" ]; then
   read -p "Enter your GitHub repository (username/repo): " GITHUB_REPO
+  # Remove .git from the end if present
+  GITHUB_REPO=${GITHUB_REPO%.git}
+  # Remove https:// or http:// prefix if present
+  GITHUB_REPO=${GITHUB_REPO#https://github.com/}
+  GITHUB_REPO=${GITHUB_REPO#http://github.com/}
+  # Add github.com/ prefix if not present
+  [[ $GITHUB_REPO != *"github.com/"* ]] && GITHUB_REPO="github.com/$GITHUB_REPO"
 fi
 
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -252,8 +259,8 @@ Resources:
       Timeout: 30
       MemorySize: 256
       Code:
-        ZipFile: |
-          // This is a placeholder. The actual code will be deployed from your repository
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: lambda-function.zip
 
   # API Gateway
   ChatAPI:
@@ -422,6 +429,11 @@ Resources:
       BranchName: main
       EnableAutoBuild: true
 
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 Bucket containing Lambda code
+
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
@@ -439,29 +451,44 @@ check_stack
 echo "Creating S3 bucket for CloudFormation template..."
 aws s3 mb s3://$S3_BUCKET --region $AWS_REGION || true
 
-# Create a zip file for the Lambda function
+# Create a simple zip file for the Lambda function using PowerShell (for Windows)
 echo "Creating Lambda function package..."
-cd lambda
-zip -r ../lambda-function.zip .
-cd ..
+if [ -x "$(command -v zip)" ]; then
+  # If zip is available, use it
+  cd lambda
+  zip -r ../lambda-function.zip .
+  cd ..
+else
+  # If zip is not available, try using PowerShell (for Windows)
+  echo "Zip command not found, trying PowerShell..."
+  cd lambda
+  powershell -command "Compress-Archive -Path .\* -DestinationPath ..\lambda-function.zip -Force"
+  cd ..
+  
+  # If PowerShell fails, create a minimal zip file
+  if [ ! -f lambda-function.zip ]; then
+    echo "PowerShell not available, trying a minimal approach..."
+    # For Windows GitBash, we'll create a directly uploadable file
+    echo "console.log('Uploading Lambda code directly...');" > lambda-direct.js
+    aws s3 cp lambda/index.js s3://$S3_BUCKET/index.js
+    
+    # Modify template to use direct code
+    sed -i 's/S3Key: lambda-function.zip/S3Key: index.js/' template.yaml
+  fi
+fi
 
 # Upload Lambda function to S3
 echo "Uploading Lambda function package to S3..."
-aws s3 cp lambda-function.zip s3://$S3_BUCKET/lambda-function.zip
-
-# Package and upload the CloudFormation template
-echo "Packaging CloudFormation template..."
-aws cloudformation package \
-  --template-file template.yaml \
-  --s3-bucket $S3_BUCKET \
-  --output-template-file packaged-template.yaml
+if [ -f lambda-function.zip ]; then
+  aws s3 cp lambda-function.zip s3://$S3_BUCKET/lambda-function.zip
+fi
 
 # Deploy with CloudFormation
 echo "Deploying with CloudFormation..."
 aws cloudformation deploy \
-  --template-file packaged-template.yaml \
+  --template-file template.yaml \
   --stack-name $STACK_NAME \
-  --parameter-overrides GitHubRepo=$GITHUB_REPO GitHubToken=$GITHUB_TOKEN \
+  --parameter-overrides GitHubRepo=$GITHUB_REPO GitHubToken=$GITHUB_TOKEN LambdaCodeBucket=$S3_BUCKET \
   --capabilities CAPABILITY_IAM
 
 # Get outputs
