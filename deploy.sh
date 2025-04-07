@@ -466,4 +466,13 @@ aws cloudformation deploy \
 
 # Get outputs
 echo "Getting deployment outputs..."
-API_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].
+API_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output text)
+APP_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='AmplifyAppUrl'].OutputValue" --output text)
+
+echo
+echo "Deployment complete!"
+echo "API URL: $API_URL"
+echo "App URL: $APP_URL"
+echo
+echo "Note: The Amplify app will take a few minutes to build and deploy."
+echo "You can check the status in the Amplify Console."
