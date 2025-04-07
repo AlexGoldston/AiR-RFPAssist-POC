@@ -56,8 +56,8 @@ Resources:
       Timeout: 30
       MemorySize: 256
       Code:
-        ZipFile: |
-          // This is a placeholder. The actual code will be deployed from your repository
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: lambda-function.zip
 
   # API Gateway
   ChatAPI:
@@ -225,6 +225,11 @@ Resources:
       AppId: !GetAtt AmplifyApp.AppId
       BranchName: main
       EnableAutoBuild: true
+
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 Bucket containing Lambda code
 
 Outputs:
   ApiEndpoint:

@@ -218,6 +218,10 @@ Parameters:
     Type: String
     NoEcho: true
     Description: GitHub OAuth token for accessing the repository
+    
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 Bucket containing Lambda code
 
 Resources:
   # IAM Role for Lambda Function
@@ -429,11 +433,6 @@ Resources:
       BranchName: main
       EnableAutoBuild: true
 
-Parameters:
-  LambdaCodeBucket:
-    Type: String
-    Description: S3 Bucket containing Lambda code
-
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
@@ -488,7 +487,7 @@ echo "Deploying with CloudFormation..."
 aws cloudformation deploy \
   --template-file template.yaml \
   --stack-name $STACK_NAME \
-  --parameter-overrides GitHubRepo=$GITHUB_REPO GitHubToken=$GITHUB_TOKEN LambdaCodeBucket=$S3_BUCKET \
+  --parameter-overrides AmplifyAppName=bedrock-kb-chat GitHubRepo=$GITHUB_REPO GitHubToken=$GITHUB_TOKEN LambdaCodeBucket=$S3_BUCKET \
   --capabilities CAPABILITY_IAM
 
 # Get outputs
