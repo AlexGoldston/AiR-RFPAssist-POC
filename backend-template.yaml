@@ -27,12 +27,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - bedrock:InvokeModel
-                  - bedrock:InvokeModelWithResponseStream
-                  - bedrock-agent:RetrieveAndGenerate
-                  - bedrock-agent:Retrieve
-                  - bedrock-agent:ListKnowledgeBases
-                  - bedrock-agent:ListDataSources
+                  - bedrock:*
+                  - bedrock-agent:*
+                  - bedrock-runtime:*
                 Resource: '*'
 
   # Lambda Function
@@ -43,7 +40,7 @@ Resources:
       Handler: index.handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs18.x
-      Timeout: 30
+      Timeout: 60
       MemorySize: 256
       Code:
         S3Bucket: !Ref LambdaCodeBucket
