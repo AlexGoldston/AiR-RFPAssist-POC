@@ -1,0 +1,9 @@
+{
+  "name": "bedrock-kb-chat-function",
+  "version": "1.0.0",
+  "description": "Lambda function for Bedrock Knowledge Base chat",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.1313.0"
+  }
+}

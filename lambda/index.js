@@ -1,19 +1,16 @@
 const AWS = require('aws-sdk');
 const bedrock = new AWS.BedrockRuntime();
 const bedrockAgent = new AWS.BedrockAgent();
-console.log('AWS SDK initialised')
 
 exports.handler = async (event) => {
   console.log('Event:', JSON.stringify(event));
   
   // Use the AWS_REGION from Lambda's runtime environment
   const region = process.env.AWS_REGION;
-  console.log('Using AWS Region:', region);
   
   try {
     // Check if this is a request to list knowledge bases
     if (event.path === '/api/knowledge-bases' && event.httpMethod === 'GET') {
-      console.log('Processing request to list knowledge bases');
       return await listKnowledgeBases();
     }
     
@@ -87,9 +84,7 @@ async function listKnowledgeBases() {
   };
   
   try {
-    console.log('Calling bedrockAgent.listKnowledgeBases with params:', JSON.stringify(params));
     const data = await bedrockAgent.listKnowledgeBases(params).promise();
-    console.log('Response from listKnowledgeBases:', JSON.stringify(data));
     
     // Format the KB list to include just id and name
     const knowledgeBases = data.knowledgeBaseSummaries.map(kb => ({
@@ -106,23 +101,8 @@ async function listKnowledgeBases() {
       body: JSON.stringify({ knowledgeBases })
     };
   } catch (error) {
-    console.error('Top-level error caught:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ 
-        error: error.message || 'Internal Server Error',
-        errorDetails: {
-          name: error.name,
-          code: error.code,
-          statusCode: error.statusCode,
-          requestId: error.requestId
-        }
-      })
-    };
+    console.error('Error listing knowledge bases:', error);
+    throw error;
   }
 }
 

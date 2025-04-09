@@ -1,0 +1,1 @@
+{"statusCode":200,"headers":{"Content-Type":"application/json","Access-Control-Allow-Origin":"*"},"body":"{\"knowledgeBases\":[{\"id\":\"YRCSYE8JNQ\",\"name\":\"RFPAssist-POC-KB\"},{\"id\":\"PI7YQ5KHWW\",\"name\":\"RFPAssist-POC-KB-Webcrawler\"},{\"id\":\"DZB5UPGQKW\",\"name\":\"RFPAssist-POC-KB-TargetLeadTest\"}]}"}
