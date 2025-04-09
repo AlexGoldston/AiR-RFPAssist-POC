@@ -5,7 +5,7 @@ const bedrockAgent = new AWS.BedrockAgent();
 exports.handler = async (event) => {
   console.log('Event:', JSON.stringify(event));
   
-  // Use the AWS_REGION from Lambda's runtime environment instead of a custom env var
+  // Use the AWS_REGION from Lambda's runtime environment
   const region = process.env.AWS_REGION;
   
   try {

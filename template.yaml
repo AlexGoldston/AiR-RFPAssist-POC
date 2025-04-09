@@ -15,6 +15,10 @@ Parameters:
     Type: String
     NoEcho: true
     Description: GitHub OAuth token for accessing the repository
+    
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 Bucket containing Lambda code
 
 Resources:
   # IAM Role for Lambda Function
@@ -225,11 +229,6 @@ Resources:
       AppId: !GetAtt AmplifyApp.AppId
       BranchName: main
       EnableAutoBuild: true
-
-Parameters:
-  LambdaCodeBucket:
-    Type: String
-    Description: S3 Bucket containing Lambda code
 
 Outputs:
   ApiEndpoint:

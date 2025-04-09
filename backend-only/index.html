@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bedrock Knowledge Base Chat</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background-color: #232f3e;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    .kb-selector {
+      margin-top: 10px;
+    }
+    
+    .kb-selector select {
+      margin-left: 10px;
+      padding: 5px;
+      border-radius: 4px;
+      border: none;
+    }
+    
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      background-color: #f5f5f5;
+      overflow: hidden;
+    }
+    
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .message {
+      max-width: 80%;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 10px;
+      line-height: 1.4;
+    }
+    
+    .message.user {
+      background-color: #e1f5fe;
+      color: #01579b;
+      margin-left: auto;
+    }
+    
+    .message.assistant {
+      background-color: #f1f1f1;
+      color: #333;
+    }
+    
+    .message.system {
+      background-color: #ffebee;
+      color: #c62828;
+      text-align: center;
+      margin: 0 auto;
+    }
+    
+    .input-form {
+      display: flex;
+      padding: 15px;
+      background-color: white;
+      border-top: 1px solid #ddd;
+    }
+    
+    .input-form input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      outline: none;
+      font-size: 1rem;
+    }
+    
+    .input-form button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #ff9900;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    
+    .input-form button:hover {
+      background-color: #e88e00;
+    }
+    
+    .input-form button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .loading .typing-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .typing-indicator span {
+      height: 8px;
+      width: 8px;
+      float: left;
+      margin: 0 1px;
+      background-color: #9E9EA1;
+      display: block;
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: 1s blink infinite;
+    }
+    
+    .typing-indicator span:nth-of-type(1) {
+      animation-delay: 0.3333s;
+    }
+    
+    .typing-indicator span:nth-of-type(2) {
+      animation-delay: 0.6666s;
+    }
+    
+    .typing-indicator span:nth-of-type(3) {
+      animation-delay: 0.9999s;
+    }
+    
+    @keyframes blink {
+      50% {
+        opacity: 1;
+      }
+    }
+    
+    .api-config {
+      padding: 10px;
+      background-color: #eee;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .api-config input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    
+    .api-config button {
+      margin-top: 5px;
+      padding: 8px;
+      background-color: #232f3e;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .debug-info {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+      background-color: #f8f8f8;
+      padding: 5px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 60px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Bedrock Knowledge Base Chat</h1>
+    <div class="kb-selector">
+      <label for="kb-select">Select Knowledge Base:</label>
+      <select id="kb-select">
+        <option value="">Loading...</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="api-config">
+    <label for="api-endpoint">API Endpoint URL:</label>
+    <input type="text" id="api-endpoint" placeholder="https://your-api-id.execute-api.region.amazonaws.com/prod">
+    <button id="save-endpoint">Save & Connect</button>
+    <div id="debug-info" class="debug-info" style="display: none;"></div>
+  </div>
+  
+  <div class="chat-container">
+    <div class="messages-container" id="messages">
+      <div class="message system">
+        Configure your API endpoint and click "Save & Connect" to start chatting.
+      </div>
+    </div>
+    
+    <form class="input-form" id="chat-form">
+      <input
+        type="text"
+        id="user-input"
+        placeholder="Ask a question..."
+        disabled
+      />
+      <button type="submit" disabled>Send</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const apiEndpointInput = document.getElementById('api-endpoint');
+      const saveEndpointButton = document.getElementById('save-endpoint');
+      const kbSelect = document.getElementById('kb-select');
+      const messagesContainer = document.getElementById('messages');
+      const chatForm = document.getElementById('chat-form');
+      const userInput = document.getElementById('user-input');
+      const sendButton = chatForm.querySelector('button');
+      const debugInfo = document.getElementById('debug-info');
+      
+      // Helper function to show debug info
+      function showDebug(message) {
+        debugInfo.style.display = 'block';
+        debugInfo.textContent = message;
+      }
+      
+      // Check for saved API endpoint
+      const savedEndpoint = localStorage.getItem('apiEndpoint');
+      if (savedEndpoint) {
+        apiEndpointInput.value = savedEndpoint;
+      }
+      
+      // Save API endpoint and load knowledge bases
+      saveEndpointButton.addEventListener('click', function() {
+        const endpoint = apiEndpointInput.value.trim();
+        if (!endpoint) {
+          addMessage('Please enter a valid API endpoint URL', 'system');
+          return;
+        }
+        
+        localStorage.setItem('apiEndpoint', endpoint);
+        addMessage('API endpoint saved. Loading knowledge bases...', 'system');
+        loadKnowledgeBases(endpoint);
+      });
+      
+      // Load knowledge bases from the API
+      function loadKnowledgeBases(endpoint) {
+        // Remove trailing slash if present
+        endpoint = endpoint.replace(/\/$/, "");
+        
+        // Make sure we're correctly constructing the URL
+        const fetchUrl = `${endpoint}/api/knowledge-bases`;
+        console.log(`Fetching from: ${fetchUrl}`);
+        showDebug(`Fetching from: ${fetchUrl}`);
+        
+        fetch(fetchUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => {
+          console.log("Response status:", response.status);
+          showDebug(`Response status: ${response.status}`);
+          
+          if (!response.ok) {
+            return response.text().then(text => {
+              throw new Error(`HTTP error! Status: ${response.status}, Response: ${text}`);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("Received data:", data);
+          
+          if (data.knowledgeBases && data.knowledgeBases.length > 0) {
+            // Clear existing options
+            kbSelect.innerHTML = '';
+            
+            // Add new options
+            data.knowledgeBases.forEach(kb => {
+              const option = document.createElement('option');
+              option.value = kb.id;
+              option.textContent = kb.name;
+              kbSelect.appendChild(option);
+            });
+            
+            // Enable chat
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            
+            addMessage(`${data.knowledgeBases.length} knowledge bases loaded. You can now start chatting!`, 'system');
+            showDebug(`Successfully loaded ${data.knowledgeBases.length} knowledge bases.`);
+          } else {
+            addMessage('No knowledge bases found. Please create a knowledge base in your AWS account first.', 'system');
+            showDebug('API returned successfully but no knowledge bases were found.');
+          }
+        })
+        .catch(error => {
+          console.error('Error loading knowledge bases:', error);
+          addMessage(`Error loading knowledge bases: ${error.message}. Please check your API endpoint.`, 'system');
+          showDebug(`Error: ${error.message}`);
+        });
+      }
+      
+      // Handle chat form submission
+      chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = userInput.value.trim();
+        const knowledgeBaseId = kbSelect.value;
+        const endpoint = localStorage.getItem('apiEndpoint');
+        
+        if (!message || !knowledgeBaseId || !endpoint) {
+          return;
+        }
+        
+        // Add user message
+        addMessage(message, 'user');
+        userInput.value = '';
+        
+        // Disable input during processing
+        userInput.disabled = true;
+        sendButton.disabled = true;
+        
+        // Add loading indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message assistant loading';
+        const loadingContent = document.createElement('div');
+        loadingContent.className = 'typing-indicator';
+        loadingContent.innerHTML = '<span></span><span></span><span></span>';
+        loadingDiv.appendChild(loadingContent);
+        messagesContainer.appendChild(loadingDiv);
+        scrollToBottom();
+        
+        // Send API request
+        const chatUrl = `${endpoint}/api/chat`;
+        showDebug(`Sending chat request to: ${chatUrl}`);
+        
+        fetch(chatUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            message,
+            knowledgeBaseId
+          }),
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.text().then(text => {
+              throw new Error(`HTTP error! Status: ${response.status}, Response: ${text}`);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Remove loading indicator
+          messagesContainer.removeChild(loadingDiv);
+          
+          // Add response
+          addMessage(data.response, 'assistant');
+          
+          // Re-enable input
+          userInput.disabled = false;
+          sendButton.disabled = false;
+          userInput.focus();
+        })
+        .catch(error => {
+          // Remove loading indicator
+          if (loadingDiv.parentNode === messagesContainer) {
+            messagesContainer.removeChild(loadingDiv);
+          }
+          
+          console.error('Error sending message:', error);
+          addMessage(`Error: ${error.message}. Please try again.`, 'system');
+          showDebug(`Chat error: ${error.message}`);
+          
+          // Re-enable input
+          userInput.disabled = false;
+          sendButton.disabled = false;
+        });
+      });
+      
+      // Add a message to the chat
+      function addMessage(text, role) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}`;
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.textContent = text;
+        messageDiv.appendChild(messageContent);
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+      }
+      
+      // Scroll to the bottom of the chat
+      function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+      
+      // If we have a saved endpoint, try to load knowledge bases
+      if (savedEndpoint) {
+        loadKnowledgeBases(savedEndpoint);
+      }
+    });
+  </script>
+</body>
+</html>
