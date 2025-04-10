@@ -14,45 +14,55 @@
       height: 100vh;
       max-width: 800px;
       margin: 0 auto;
-    }
-    
-    .header {
-      background-color: #232f3e;
+      background-color: #000;
       color: white;
-      padding: 20px;
+    }
+
+    .header {
+      padding: 20px 0 10px;
       text-align: center;
     }
-    
+
+    .header svg {
+      width: 200px;
+      height: auto;
+      display: block;
+      margin: 0 auto 10px;
+    }
+
     .header h1 {
       margin: 0;
       font-size: 1.5rem;
+      color: white;
     }
-    
+
     .kb-selector {
       margin-top: 10px;
     }
-    
+
     .kb-selector select {
       margin-left: 10px;
       padding: 5px;
       border-radius: 4px;
       border: none;
+      background-color: #111;
+      color: white;
     }
-    
+
     .chat-container {
       display: flex;
       flex-direction: column;
       flex: 1;
-      background-color: #f5f5f5;
+      background-color: #000;
       overflow: hidden;
     }
-    
+
     .messages-container {
       flex: 1;
       overflow-y: auto;
       padding: 20px;
     }
-    
+
     .message {
       max-width: 80%;
       margin-bottom: 15px;
@@ -60,124 +70,113 @@
       border-radius: 10px;
       line-height: 1.4;
     }
-    
+
     .message.user {
-      background-color: #e1f5fe;
-      color: #01579b;
+      background-color: #333;
+      color: white;
       margin-left: auto;
     }
-    
+
     .message.assistant {
-      background-color: #f1f1f1;
-      color: #333;
+      background-color: #111;
+      color: #eee;
     }
-    
+
     .message.system {
-      background-color: #ffebee;
-      color: #c62828;
+      background-color: #222;
+      color: #ff4c4c;
       text-align: center;
       margin: 0 auto;
     }
-    
+
     .input-form {
       display: flex;
       padding: 15px;
-      background-color: white;
-      border-top: 1px solid #ddd;
+      background-color: #000;
+      border-top: 1px solid #222;
     }
-    
+
     .input-form input {
       flex: 1;
       padding: 10px 15px;
-      border: 1px solid #ddd;
+      background-color: #111;
+      color: white;
+      border: 1px solid #333;
       border-radius: 20px;
       outline: none;
       font-size: 1rem;
     }
-    
+
     .input-form button {
       margin-left: 10px;
       padding: 10px 20px;
-      background-color: #ff9900;
-      color: white;
+      background-color: white;
+      color: black;
       border: none;
       border-radius: 20px;
       cursor: pointer;
       font-weight: bold;
       transition: background-color 0.2s;
     }
-    
+
     .input-form button:hover {
-      background-color: #e88e00;
+      background-color: #ddd;
     }
-    
+
     .input-form button:disabled {
-      background-color: #ccc;
+      background-color: #444;
+      color: #888;
       cursor: not-allowed;
     }
-    
-    .loading .typing-indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
+
     .typing-indicator span {
       height: 8px;
       width: 8px;
-      float: left;
       margin: 0 1px;
-      background-color: #9E9EA1;
-      display: block;
+      background-color: #999;
+      display: inline-block;
       border-radius: 50%;
       opacity: 0.4;
-      animation: 1s blink infinite;
+      animation: blink 1s infinite;
     }
-    
-    .typing-indicator span:nth-of-type(1) {
-      animation-delay: 0.3333s;
-    }
-    
-    .typing-indicator span:nth-of-type(2) {
-      animation-delay: 0.6666s;
-    }
-    
-    .typing-indicator span:nth-of-type(3) {
-      animation-delay: 0.9999s;
-    }
-    
+
+    .typing-indicator span:nth-of-type(1) { animation-delay: 0.333s; }
+    .typing-indicator span:nth-of-type(2) { animation-delay: 0.666s; }
+    .typing-indicator span:nth-of-type(3) { animation-delay: 0.999s; }
+
     @keyframes blink {
-      50% {
-        opacity: 1;
-      }
+      50% { opacity: 1; }
     }
-    
+
     .api-config {
       padding: 10px;
-      background-color: #eee;
-      border-bottom: 1px solid #ddd;
+      background-color: #111;
+      border-bottom: 1px solid #222;
     }
-    
+
     .api-config input {
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
+      background-color: #000;
+      color: white;
+      border: 1px solid #333;
     }
-    
+
     .api-config button {
       margin-top: 5px;
       padding: 8px;
-      background-color: #232f3e;
-      color: white;
+      background-color: white;
+      color: black;
       border: none;
       cursor: pointer;
     }
-    
+
     .debug-info {
       margin-top: 8px;
       font-size: 12px;
-      color: #666;
-      background-color: #f8f8f8;
+      color: #aaa;
+      background-color: #111;
       padding: 5px;
       border-radius: 4px;
       white-space: pre-wrap;
@@ -189,7 +188,21 @@
 </head>
 <body>
   <div class="header">
-    <h1>Bedrock Knowledge Base Chat</h1>
+    <svg class="c-populous-logo_wide" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1376 154.97797">
+      <g>
+          <path fill="white" d="M1361.68994,3.00317c-8.02991,0-14.37,6.52185-14.37,14.29871v.08972c0,7.77679,6.27002,14.20898,14.30005,14.20898,8.04004,0,14.38-6.52179,14.38-14.29871v-.0896c0-7.77692-6.27002-14.20911-14.31006-14.20911ZM1374.32996,17.30188c0,6.99249-5.5199,12.70752-12.72998,12.70752s-12.63-5.64783-12.63-12.64032v-.0896c0-6.99249,5.51001-12.70746,12.71997-12.70746s12.64001,5.64777,12.64001,12.64026v.0896Z" style="stroke-width: 0px;"></path>
+          <path fill="white" d="M1365.21997,19.04999c1.94006-.71716,3.28003-2.26361,3.28003-4.70636v-.08972c0-1.34473-.44995-2.48773-1.27002-3.31689-1.06995-1.05341-2.66003-1.65851-4.70996-1.65851h-6.77002v15.21759h3.37v-4.9082h2.66003l3.23999,4.9082h3.92993l-3.72998-5.44611ZM1365.10999,14.52283c0,1.27747-.92004,2.17395-2.60999,2.17395h-3.38v-4.45996h3.29004c1.66992,0,2.69995.76196,2.69995,2.21881v.0672Z" style="stroke-width: 0px;"></path>
+      </g>
+      <path fill="white" d="M1203.56006,110.58c6.15991,39.153,51.04993,43.38899,70.17993,43.38899,21.39001,0,71.12-4.72899,71.12-48.67799,0-26.2894-23.85999-35.8817-47.20996-41.776-5.13-1.2774-10.25-2.398-15.13-3.4514-19.27002-4.191-34.46997-7.4631-34.46997-17.8846s11.69995-14.4332,22.63-14.4332c6.31995,0,17.85999,1.0085,24.25,7.7097,2.63,2.7566,4.05994,6.1632,4.23999,10.1077l39.48999-6.2305c-5.41003-28.5526-37.97009-38.68276-64.48999-38.68276-33.08008,0-66.46008,13.62636-66.46008,44.03916,0,26.0201,22.93005,35.4555,47.68005,41.7756,4.17993,1.0534,8.34998,1.9947,12.39001,2.936,19.89001,4.5047,36.73999,8.3372,36.73999,20.50629,0,12.17001-14.58997,16.944-28.26001,16.944-20.93005,0-31.44995-7.306-33.01001-22.995l-39.72998,6.701.04004.023Z" style="stroke-width: 0px;"></path>
+      <path fill="white" d="M1034.41003,3.048v83.7977c0,44.4653,23.88,67.9523,69.03992,67.9523,45.15002,0,69.91003-23.86801,69.91003-69.05051V3.048h-39.72998v84.0218c0,21.2242-10.56006,32.9002-29.73999,32.9002-19.17004,0-29.72998-12.371-29.72998-33.9759V3.048h-39.75Z" style="stroke-width: 0px;"></path>
+      <path fill="white" d="M923.65399.00024c-45.30774.00549-80.81702,34.04681-80.81702,77.49976v.42578c0,43.21021,35.31403,77.05219,80.38202,77.05219s80.80103-34.02197,80.80103-77.47797v-.44818C1004.02002,33.84534,968.73975.00574,923.65399.00024ZM964.06799,77.92578c0,24.07019-17.36597,42.24622-40.40302,42.24622h-.02197c-22.79102,0-40.62598-18.73602-40.62598-42.672v-.44818c0-24.07031,17.27698-42.22394,40.20197-42.22394s40.849,18.75873,40.849,42.67212v.42578Z" style="stroke-width: 0px;"></path>
+      <polygon fill="white" points="713.90503 3.048 713.90503 151.974 826.922 151.974 826.922 118.222 753.013 118.222 753.013 3.048 713.927 3.048 713.90503 3.048" style="stroke-width: 0px;"></polygon>
+      <path fill="white" d="M535.15002,3.048v83.7977c0,44.4653,23.862,67.9523,69.04199,67.9523s69.91199-23.86801,69.91199-69.05051V3.048h-39.73303v84.0218c0,21.2242-10.55798,32.9002-29.73297,32.9002-19.17401,0-29.73297-12.371-29.73297-33.9759V3.048h-39.755Z" style="stroke-width: 0px;"></path>
+      <path fill="white" d="M439.67804,3.04797h-76.87701v148.92603h39.10797v-43.45599h35.604c39.48804,0,64.01904-20.37244,64.01904-53.18329v-.42584c0-31.98157-23.70605-51.8609-61.854-51.8609ZM462.44702,57.28461c0,12.97638-10.13501,21.3808-25.80499,21.3808h-34.73303v-43.38922h34.51001c16.54102,0,26.02802,7.86652,26.02802,21.58252v.4259Z" style="stroke-width: 0px;"></path>
+      <path fill="white" d="M248.914,0h-.02301c-45.31396,0-80.80597,34.04352-80.80597,77.5v.42578c0,43.21021,35.31396,77.05219,80.38196,77.05219s80.82806-34.02197,80.82806-77.47797v-.44818C329.29504,33.8418,293.98199,0,248.914,0ZM289.33899,77.92578c0,24.07019-17.367,42.24622-40.40295,42.24622h-.02203c-22.79102,0-40.62701-18.73602-40.62701-42.672v-.44818c0-24.07031,17.27802-42.22394,40.20203-42.22394s40.84998,18.75873,40.84998,42.67212v.42578Z" style="stroke-width: 0px;"></path>
+      <path fill="white" d="M76.85492,3.04797H0v148.92603h39.086v-43.45599h35.6037c39.4873,0,64.01929-20.37244,64.01929-53.18329v-.42584c0-31.98157-23.70599-51.8609-61.85406-51.8609ZM99.62341,57.28461c0,12.97638-10.13422,21.3808-25.80432,21.3808h-34.73309v-43.38922h34.50989c16.54071,0,26.02753,7.86652,26.02753,21.58252v.4259Z" style="stroke-width: 0px;"></path>
+    </svg>
+    <h1>Bedrock Knowledge Base Chat Demo - API Test</h1>
     <div class="kb-selector">
       <label for="kb-select">Select Knowledge Base:</label>
       <select id="kb-select">
